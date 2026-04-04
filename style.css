@@ -232,7 +232,7 @@ body {
 }
 
 .btn-action {
-  width: 220px;
+  width: 420px;
   height: 52px;
   background: #e07818;
   color: #fff;
@@ -250,7 +250,7 @@ body {
 .btn-action:disabled { background: #7c5030; cursor: not-allowed; }
 
 .btn-secondary {
-  width: 220px;
+  width: 420px;
   height: 38px;
   background: #505050;
   color: #e6e6e6;
@@ -262,8 +262,19 @@ body {
 
 .btn-secondary:hover { background: #606060; }
 
+.btn-row {
+  display: flex;
+  gap: 6px;
+  width: 420px;
+}
+
+.btn-half {
+  flex: 1;
+  width: auto;
+}
+
 .ctrl-sep {
-  width: 200px;
+  width: 420px;
   border: none;
   border-top: 1px solid #555;
 }

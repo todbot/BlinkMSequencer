@@ -203,7 +203,7 @@ ipcMain.handle('seq:open', async () => {
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 860,
+    width: 960,
     height: 560,
     resizable: false,
     title: 'BlinkM Sequencer',

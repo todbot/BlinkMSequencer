@@ -33,7 +33,7 @@ const playBtn     = document.getElementById('play-btn');
 const uploadBtn   = document.getElementById('upload-btn');
 const downloadBtn = document.getElementById('download-btn');
 const openBtn     = document.getElementById('open-btn');
-const saveBtn     = document.getElementById('save-btn');
+const saveBtn     = document.getElementById('save-btn');   // "Save…"
 const connectBtn  = document.getElementById('connect-btn');
 const loopCheck   = document.getElementById('loop-check');
 const speedSelect = document.getElementById('speed-select');
@@ -256,7 +256,8 @@ function scheduleFrame() {
     setLedTarget(c.r, c.g, c.b);
     if (isConnected && idx !== lastPlayIdx) {
       lastPlayIdx = idx;
-      window.linkm.sendColor(c.r, c.g, c.b);
+      const isUnset = c.r === DEFAULT_RGB.r && c.g === DEFAULT_RGB.g && c.b === DEFAULT_RGB.b;
+      window.linkm.sendColor(isUnset ? 0 : c.r, isUnset ? 0 : c.g, isUnset ? 0 : c.b);
     }
 
     scheduleFrame();
