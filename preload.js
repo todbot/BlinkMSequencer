@@ -9,6 +9,9 @@ contextBridge.exposeInMainWorld('linkm', {
   sendColor:      (r, g, b)           => ipcRenderer.invoke('linkm:sendColor', r, g, b),
   preparePreview: (duration)          => ipcRenderer.invoke('linkm:preparePreview', duration),
   burn:           (colors, dur, loop) => ipcRenderer.invoke('linkm:burn', colors, dur, loop),
+  download:       ()                  => ipcRenderer.invoke('linkm:download'),
+  save:           (data)              => ipcRenderer.invoke('seq:save', data),
+  open:           ()                  => ipcRenderer.invoke('seq:open'),
 
   // Push events (main → renderer)
   onStatus:       (fn) => ipcRenderer.on('linkm:status',       (_, state)    => fn(state)),

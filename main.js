@@ -1,6 +1,7 @@
 'use strict';
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs   = require('fs');
 const HID  = require('node-hid');
 
 // ── LinkM USB identifiers ──────────────────────────────────────────────────
@@ -70,6 +71,7 @@ function hidCommand(cmd, sendBytes, recvLen) {
 function i2c(addr, bytes) {
   hidCommand(CMD_I2CTRANS, [addr, ...bytes], 0);
 }
+
 
 // ── BlinkM I2C commands (command bytes from BlinkM datasheet) ──────────────
 const bm = {
@@ -193,6 +195,63 @@ ipcMain.handle('linkm:burn', async (_, colors, duration, loop) => {
 
     win?.webContents.send('linkm:burnProgress', colors.length, colors.length);
     return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// Read sequence back from BlinkM EEPROM
+// 'R' (0x52): readScriptLine — returns [ticks, cmd, arg1, arg2, arg3]
+// When cmd is 0x63 (fadeToRGB), arg1/2/3 are r, g, b.
+ipcMain.handle('linkm:download', async () => {
+  try {
+    // Stop any running script first to avoid I2C conflicts during reads
+    bm.stopScript();
+    await sleep(100);
+
+    const colors = [];
+    for (let i = 0; i < 48; i++) {
+      const data = hidCommand(CMD_I2CTRANS, [BLINKM_ADDR, 0x52, 0, i], 5);
+      colors.push({ r: data[2], g: data[3], b: data[4] });
+      win?.webContents.send('linkm:burnProgress', i, 48);
+      await sleep(50);
+    }
+
+    win?.webContents.send('linkm:burnProgress', 48, 48);
+    return { ok: true, colors };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// Save sequence to a file (shows native save dialog)
+ipcMain.handle('seq:save', async (_, data) => {
+  const { canceled, filePath } = await dialog.showSaveDialog(win, {
+    title: 'Save Sequence',
+    defaultPath: 'sequence.blinkm',
+    filters: [{ name: 'BlinkM Sequence', extensions: ['blinkm'] }],
+  });
+  if (canceled || !filePath) return { ok: false };
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// Open a sequence file (shows native open dialog)
+ipcMain.handle('seq:open', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+    title: 'Open Sequence',
+    filters: [{ name: 'BlinkM Sequence', extensions: ['blinkm'] }],
+    properties: ['openFile'],
+  });
+  if (canceled || !filePaths.length) return { ok: false };
+  try {
+    const raw  = fs.readFileSync(filePaths[0], 'utf8');
+    const data = JSON.parse(raw);
+    return { ok: true, data };
   } catch (e) {
     return { ok: false, error: e.message };
   }

@@ -28,6 +28,9 @@ const timelineEl  = document.getElementById('timeline');
 const playheadEl  = document.getElementById('playhead');
 const playBtn     = document.getElementById('play-btn');
 const uploadBtn   = document.getElementById('upload-btn');
+const downloadBtn = document.getElementById('download-btn');
+const openBtn     = document.getElementById('open-btn');
+const saveBtn     = document.getElementById('save-btn');
 const connectBtn  = document.getElementById('connect-btn');
 const loopCheck   = document.getElementById('loop-check');
 const speedSelect = document.getElementById('speed-select');
@@ -36,6 +39,7 @@ const hexInput    = document.getElementById('hex-input');
 const ledEl       = document.getElementById('led');
 const connStatus  = document.getElementById('conn-status');
 const overlay     = document.getElementById('overlay');
+const overlayMsg  = document.getElementById('overlay-msg');
 const overlayProg = document.getElementById('overlay-progress');
 const overlaySub  = document.getElementById('overlay-sub');
 const overlayOk   = document.getElementById('overlay-ok');
@@ -256,30 +260,79 @@ function scheduleFrame() {
   });
 }
 
-// ── Upload (burn) ─────────────────────────────────────────────────────────────
+// ── Upload / Download ─────────────────────────────────────────────────────────
 
-async function doUpload() {
-  if (!isConnected) {
-    alert('Please connect a LinkM device first.');
-    return;
-  }
-
-  overlay.classList.remove('hidden');
-  overlayProg.value = 0;
-  overlayProg.max   = NUM_SLICES;
+function showOverlay(msg, total) {
+  overlayMsg.textContent = msg;
+  overlayProg.value      = 0;
+  overlayProg.max        = total;
   overlaySub.textContent = '';
   overlayOk.classList.add('hidden');
+  overlay.classList.remove('hidden');
+}
+
+async function doUpload() {
+  if (!isConnected) { alert('Please connect a LinkM device first.'); return; }
+  showOverlay('Writing sequence to BlinkM\u2026', NUM_SLICES);
   uploadBtn.disabled = true;
 
   const result = await window.linkm.burn(sliceColors, duration, isLoop);
 
+  overlaySub.textContent = result.ok
+    ? 'Done. BlinkM will play this sequence on power-up.'
+    : 'Error: ' + result.error;
+  overlayOk.classList.remove('hidden');
+  uploadBtn.disabled = false;
+}
+
+async function doDownload() {
+  if (!isConnected) { alert('Please connect a LinkM device first.'); return; }
+  showOverlay('Reading sequence from BlinkM\u2026', NUM_SLICES);
+  downloadBtn.disabled = true;
+
+  const result = await window.linkm.download();
+
   if (result.ok) {
-    overlaySub.textContent = 'Done. BlinkM will play this sequence on power-up.';
+    loadColors(result.colors);
+    overlaySub.textContent = 'Done.';
   } else {
     overlaySub.textContent = 'Error: ' + result.error;
   }
   overlayOk.classList.remove('hidden');
-  uploadBtn.disabled = false;
+  downloadBtn.disabled = false;
+}
+
+// ── Open / Save ───────────────────────────────────────────────────────────────
+
+// JSON format: { version: 1, duration: 3, loop: true, colors: [{r,g,b}×48] }
+
+async function doSave() {
+  await window.linkm.save({ version: 1, duration, loop: isLoop, colors: sliceColors });
+}
+
+async function doOpen() {
+  const result = await window.linkm.open();
+  if (!result.ok) return;
+  const { data } = result;
+  if (!Array.isArray(data.colors) || data.colors.length !== NUM_SLICES) {
+    alert('Invalid sequence file.');
+    return;
+  }
+  loadColors(data.colors);
+  if (typeof data.duration === 'number') {
+    duration = data.duration;
+    speedSelect.value = String(duration);
+  }
+  if (typeof data.loop === 'boolean') {
+    isLoop = data.loop;
+    loopCheck.checked = isLoop;
+  }
+}
+
+// Replace all slice colors and refresh the timeline
+function loadColors(colors) {
+  sliceColors = colors.map(({ r, g, b }) => ({ r, g, b }));
+  timelineEl.querySelectorAll('.slice').forEach((el, i) => setCellBg(el, sliceColors[i]));
 }
 
 // ── Connection ────────────────────────────────────────────────────────────────
@@ -309,10 +362,13 @@ function setConnStatus(state) {
 
 // ── Event wiring ──────────────────────────────────────────────────────────────
 
-playBtn.addEventListener('click',   () => { if (isPlaying) stopPlay(); else startPlay(); });
-uploadBtn.addEventListener('click', doUpload);
-overlayOk.addEventListener('click', () => overlay.classList.add('hidden'));
-connectBtn.addEventListener('click', () => { if (isConnected) disconnect(); else connect(); });
+playBtn.addEventListener('click',     () => { if (isPlaying) stopPlay(); else startPlay(); });
+uploadBtn.addEventListener('click',   doUpload);
+downloadBtn.addEventListener('click', doDownload);
+openBtn.addEventListener('click',     doOpen);
+saveBtn.addEventListener('click',     doSave);
+overlayOk.addEventListener('click',   () => overlay.classList.add('hidden'));
+connectBtn.addEventListener('click',  () => { if (isConnected) disconnect(); else connect(); });
 
 loopCheck.addEventListener('change', () => { isLoop = loopCheck.checked; });
 

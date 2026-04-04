@@ -56,10 +56,14 @@
 
     <!-- Action buttons -->
     <div id="controls-panel">
-      <button id="play-btn"    class="btn-action">▶  Play</button>
-      <button id="upload-btn"  class="btn-action">↑  Upload to BlinkM</button>
+      <button id="play-btn"     class="btn-action">▶  Play</button>
+      <button id="upload-btn"   class="btn-action">↑  Upload to BlinkM</button>
+      <button id="download-btn" class="btn-action">↓  Download from BlinkM</button>
       <hr class="ctrl-sep">
-      <button id="connect-btn" class="btn-secondary">Connect LinkM</button>
+      <button id="open-btn"     class="btn-secondary">Open…</button>
+      <button id="save-btn"     class="btn-secondary">Save</button>
+      <hr class="ctrl-sep">
+      <button id="connect-btn"  class="btn-secondary">Connect LinkM</button>
     </div>
 
   </div>
@@ -67,7 +71,7 @@
   <!-- ── Upload progress overlay ──────────────────────────────────────── -->
   <div id="overlay" class="hidden">
     <div id="overlay-box">
-      <p id="overlay-msg">Writing sequence to BlinkM…</p>
+      <p id="overlay-msg"></p>
       <progress id="overlay-progress" max="48" value="0"></progress>
       <p id="overlay-sub"></p>
       <button id="overlay-ok" class="hidden btn-secondary">OK</button>
