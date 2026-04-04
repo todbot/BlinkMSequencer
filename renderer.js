@@ -9,7 +9,10 @@ let sliceColors = Array.from({ length: NUM_SLICES }, () => ({ ...DEFAULT_RGB }))
 let selected    = new Set([0]);   // start with first slice selected
 let isPlaying   = false;
 let isLoop      = true;
-let duration    = 3;       // seconds
+let duration    = 1;       // BlinkM ticks (1=3s, 18=30s, 72=120s)
+
+// ticks → wall-clock seconds, used only for the playback animation timer
+const TICK_SECONDS = { 1: 3, 18: 30, 72: 120 };
 let isConnected = false;
 let isDragging  = false;
 let dragAnchor  = 0;
@@ -234,7 +237,7 @@ function scheduleFrame() {
   playRafId = requestAnimationFrame(() => {
     if (!isPlaying) return;
 
-    let progress = (performance.now() - playStart) / (duration * 1000);
+    let progress = (performance.now() - playStart) / ((TICK_SECONDS[duration] ?? 3) * 1000);
 
     if (progress >= 1.0) {
       if (isLoop) {
@@ -294,6 +297,10 @@ async function doDownload() {
 
   if (result.ok) {
     loadColors(result.colors);
+    if (result.ticks) {
+      duration          = result.ticks;
+      speedSelect.value = String(duration);
+    }
     overlaySub.textContent = 'Done.';
   } else {
     overlaySub.textContent = 'Error: ' + result.error;
@@ -304,7 +311,8 @@ async function doDownload() {
 
 // ── Open / Save ───────────────────────────────────────────────────────────────
 
-// JSON format: { version: 1, duration: 3, loop: true, colors: [{r,g,b}×48] }
+// JSON format: { version: 1, duration: 1, loop: true, colors: [{r,g,b}×48] }
+// duration is in BlinkM ticks (1=3s, 18=30s, 72=120s)
 
 async function doSave() {
   await window.linkm.save({ version: 1, duration, loop: isLoop, colors: sliceColors });

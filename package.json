@@ -2,17 +2,50 @@
   "name": "blinkm-sequencer",
   "version": "0.1.0",
   "description": "BlinkM Sequencer for LinkM (USB HID)",
+  "author": "Tod Kurt <tod@todbot.com> (https://github.com/todbot)",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "debug": "BLINKM_DEVTOOLS=1 electron .",
-    "rebuild": "electron-rebuild -f -w node-hid"
+    "rebuild": "electron-rebuild -f -w node-hid",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist": "electron-builder --mac --win",
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "node-hid": "^3.1.0"
   },
   "devDependencies": {
     "electron": "^28.0.0",
-    "@electron/rebuild": "^3.6.0"
+    "@electron/rebuild": "^3.6.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.thingm.blinkm-sequencer",
+    "productName": "BlinkM Sequencer",
+    "files": [
+      "main.js",
+      "linkm.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "style.css"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ]
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "installerIcon": null
+    }
   }
 }
