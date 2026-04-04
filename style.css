@@ -79,16 +79,16 @@ body {
   margin-top: 10px;   /* scrub area at top */
 }
 
-/* top scrub strip (always light) */
-#timeline::before {
-  content: '';
+/* top scrub strip */
+#scrub-bar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 10px;
   background: #e6e6e6;
-  pointer-events: none;
+  cursor: col-resize;
+  z-index: 5;
 }
 
 .slice.selected {
@@ -151,6 +151,7 @@ body {
   display: grid;
   grid-template-columns: repeat(16, 20px);
   gap: 1px;
+  margin-top: 27px;
 }
 
 .swatch {
@@ -164,6 +165,11 @@ body {
   outline: 2px solid #fff;
   outline-offset: -1px;
   z-index: 1;
+}
+
+.swatch.active {
+  box-shadow: 0 0 0 2px #ffffff;
+  z-index: 2;
 }
 
 #color-row {

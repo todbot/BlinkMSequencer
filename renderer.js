@@ -88,6 +88,18 @@ function positionPlayhead(progress) {
   playheadEl.style.left = (18 + progress * usable) + 'px';
 }
 
+// Scrub the playhead to a client X coordinate
+function scrubTo(clientX) {
+  const wrap    = document.getElementById('timeline-wrap');
+  const rect    = wrap.getBoundingClientRect();
+  const usable  = rect.width - 36;
+  const progress = Math.max(0, Math.min(1, (clientX - rect.left - 18) / usable));
+  positionPlayhead(progress);
+  if (isPlaying) {
+    playStart = performance.now() - progress * (TICK_SECONDS[duration] ?? 3) * 1000;
+  }
+}
+
 // ── Timeline interaction ──────────────────────────────────────────────────────
 
 function onSliceDown(e, i) {
@@ -99,6 +111,11 @@ function onSliceDown(e, i) {
     selected.add(i);
     isDragging = true;
     dragAnchor = i;
+    const { r, g, b } = sliceColors[i];
+    const hex = rgbToHex(r, g, b);
+    colorPicker.value = hex;
+    hexInput.value    = hex;
+    highlightSwatch(r, g, b);
   }
   refreshSelected();
   e.preventDefault();
@@ -124,12 +141,21 @@ function onSliceDblClick(i) {
 
 // ── Color logic ───────────────────────────────────────────────────────────────
 
+function highlightSwatch(r, g, b) {
+  document.querySelectorAll('.swatch.active').forEach(el => el.classList.remove('active'));
+  const match = document.querySelector(
+    `.swatch[data-r="${r}"][data-g="${g}"][data-b="${b}"]`
+  );
+  if (match) match.classList.add('active');
+}
+
 function applyColor(r, g, b) {
   selected.forEach(i => {
     sliceColors[i] = { r, g, b };
     setCellBg(cellEl(i), { r, g, b });
   });
   setLedTarget(r, g, b);
+  highlightSwatch(r, g, b);
   if (isConnected) window.linkm.sendColor(r, g, b);
 }
 
@@ -183,6 +209,9 @@ function buildSwatches() {
 function addSwatch(container, { r, g, b }) {
   const el = document.createElement('div');
   el.className = 'swatch';
+  el.dataset.r = r;
+  el.dataset.g = g;
+  el.dataset.b = b;
   el.style.backgroundColor = `rgb(${r},${g},${b})`;
   el.addEventListener('click', () => {
     const hex = rgbToHex(r, g, b);
@@ -254,10 +283,16 @@ function scheduleFrame() {
     const idx = Math.min(NUM_SLICES - 1, Math.floor(progress * NUM_SLICES));
     const c   = sliceColors[idx];
     setLedTarget(c.r, c.g, c.b);
-    if (isConnected && idx !== lastPlayIdx) {
+    if (idx !== lastPlayIdx) {
       lastPlayIdx = idx;
+      const hex = rgbToHex(c.r, c.g, c.b);
+      colorPicker.value = hex;
+      hexInput.value    = hex;
+      highlightSwatch(c.r, c.g, c.b);
       const isUnset = c.r === DEFAULT_RGB.r && c.g === DEFAULT_RGB.g && c.b === DEFAULT_RGB.b;
-      window.linkm.sendColor(isUnset ? 0 : c.r, isUnset ? 0 : c.g, isUnset ? 0 : c.b);
+      if (isConnected) {
+        window.linkm.sendColor(isUnset ? 0 : c.r, isUnset ? 0 : c.g, isUnset ? 0 : c.b);
+      }
     }
 
     scheduleFrame();
@@ -277,6 +312,7 @@ function showOverlay(msg, total) {
 
 async function doUpload() {
   if (!isConnected) { alert('Please connect a LinkM device first.'); return; }
+  if (isPlaying) stopPlay();
   showOverlay('Writing sequence to BlinkM\u2026', NUM_SLICES);
   uploadBtn.disabled = true;
 
@@ -370,6 +406,16 @@ function setConnStatus(state) {
 }
 
 // ── Event wiring ──────────────────────────────────────────────────────────────
+
+const scrubBar = document.getElementById('scrub-bar');
+let isScrubbing = false;
+scrubBar.addEventListener('mousedown', e => {
+  isScrubbing = true;
+  scrubTo(e.clientX);
+  e.preventDefault();
+});
+document.addEventListener('mousemove', e => { if (isScrubbing) scrubTo(e.clientX); });
+document.addEventListener('mouseup',   () => { isScrubbing = false; });
 
 playBtn.addEventListener('click',     () => { if (isPlaying) stopPlay(); else startPlay(); });
 uploadBtn.addEventListener('click',   doUpload);
