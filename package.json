@@ -9,8 +9,10 @@
     "debug": "BLINKM_DEVTOOLS=1 electron .",
     "rebuild": "electron-rebuild -f -w node-hid",
     "dist:mac": "electron-builder --mac",
+    "dist:mac:universal": "electron-builder --mac --universal",
     "dist:win": "electron-builder --win",
     "dist": "electron-builder --mac --win",
+    "clean": "npx rimraf dist node_modules",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
@@ -23,7 +25,8 @@
   },
   "build": {
     "appId": "com.thingm.blinkm-sequencer",
-    "productName": "BlinkM Sequencer",
+    "productName": "BlinkMSequencer",
+    "icon": "build/icon",
     "files": [
       "main.js",
       "linkm.js",
@@ -34,6 +37,11 @@
     ],
     "mac": {
       "category": "public.app-category.utilities",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": true,
       "target": [
         { "target": "dmg", "arch": ["x64", "arm64"] }
       ]
