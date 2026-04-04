@@ -48,9 +48,9 @@
     },
     "win": {
       "azureSignOptions": {
-        "endpoint": "https://<your-account>.codesigning.azure.net/",
-        "trustedSigningAccountName": "<your-account>",
-        "certificateProfileName": "<your-profile>"
+        "endpoint": "https://wus2.codesigning.azure.net/",
+        "codeSigningAccountName": "thingm-signing",
+        "certificateProfileName": "ThingMProfile"
       },
       "target": [
         { "target": "nsis", "arch": ["x64"] }
