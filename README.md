@@ -6,6 +6,9 @@ Connects to a BlinkM via a [LinkM](https://thingm.com/products/linkm/) USB HID a
 
 ![BlinkM Sequencer screenshot](docs/screenshot.png)
 
+
+This is a modern Electron-based rewrite of the original BlinkMSequencer written in Java / Processing.
+
 ---
 
 ## Features
