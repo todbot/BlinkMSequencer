@@ -95,10 +95,9 @@ ipcMain.handle('linkm:burn', async (_, colors, ticks, loop) => {
 
     for (let i = 0; i < colors.length; i++) {
       let { r, g, b } = colors[i];
-      if (r === NULL_COLOR.r && g === NULL_COLOR.g && b === NULL_COLOR.b) {
-        r = g = b = 0;
-      }
-      lm.writeScriptLine(i, ticks, r, g, b);
+      const isUnset = r === NULL_COLOR.r && g === NULL_COLOR.g && b === NULL_COLOR.b;
+      if (isUnset) r = g = b = 0;
+      lm.writeScriptLine(i, isUnset ? 0 : ticks, r, g, b);
       win?.webContents.send('linkm:burnProgress', i, colors.length);
       await sleep(50);
     }
