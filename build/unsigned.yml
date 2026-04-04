@@ -1,0 +1,5 @@
+mac:
+  identity: null
+  notarize: false
+win:
+  azureSignOptions: null

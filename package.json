@@ -6,11 +6,13 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "debug": "BLINKM_DEVTOOLS=1 electron .",
+    "debug": "npx cross-env BLINKM_DEVTOOLS=1 electron .",
     "rebuild": "electron-rebuild -f -w node-hid",
     "dist:mac": "electron-builder --mac",
+    "dist:mac:unsigned": "electron-builder --mac --config build/unsigned.yml",
     "dist:mac:universal": "electron-builder --mac --universal",
     "dist:win": "electron-builder --win",
+    "dist:win:unsigned": "electron-builder --win --config build/unsigned.yml",
     "dist": "electron-builder --mac --win",
     "clean": "npx rimraf dist node_modules",
     "postinstall": "electron-builder install-app-deps"
@@ -27,6 +29,9 @@
     "appId": "com.thingm.blinkm-sequencer",
     "productName": "BlinkMSequencer",
     "icon": "build/icon",
+    "asarUnpack": [
+      "node_modules/node-hid/**/*"
+    ],
     "files": [
       "main.js",
       "linkm.js",

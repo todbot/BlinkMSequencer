@@ -121,17 +121,17 @@ Sourced from `~/projects/blinkm/linkM/c_host/linkm-lib.c` and `hiddata.c` — al
 
 ### Build Notes:
 
-Before running `npm run dist:mac`, export:
+Before running `npm run dist:mac`, export (in bash):
 ```
 export APPLE_ID="you@example.com"
 export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
 export APPLE_TEAM_ID="XXXXXXXXXX"
 ```
 
-Before running `npm run dist:win`, export:
+Before running `npm run dist:win`, export (in Powershell):
 ```
-export AZURE_TENANT_ID="..."
-export AZURE_CLIENT_ID="..."
-export AZURE_CLIENT_SECRET="..."
+$env:AZURE_TENANT_ID="..."
+$env:AZURE_CLIENT_ID="..."
+$env:AZURE_CLIENT_SECRET="..."
 ```
 Azure Trusted Signing config (endpoint, account, profile) is in `package.json` under `build.win.azureSignOptions`.
