@@ -58,7 +58,8 @@
     },
     "nsis": {
       "oneClick": true,
-      "installerIcon": null
+      "installerIcon": null,
+      "artifactName": "${productName}-Setup-${version}.exe"
     }
   }
 }

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(sips -g all /Users/tod/projects/BlinkMSequencerNew/docs/thingm-logo-bigger-grey.png)",
+      "Bash(sips:*)"
+    ]
+  }
+}
