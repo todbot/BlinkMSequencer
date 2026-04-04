@@ -1,0 +1,311 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: #646464;
+  color: #e6e6e6;
+}
+
+.hidden { display: none !important; }
+
+/* ── Top bar ── */
+#top-bar {
+  flex: 0 0 auto;
+  background: #c8c8c8;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  height: 34px;
+  border-bottom: 1px solid #aaa;
+}
+
+.top-label { font-weight: 700; font-size: 13px; letter-spacing: 1px; color: #222; }
+.top-sub   { font-size: 11px; color: #666; }
+.flex-gap  { flex: 1; }
+
+.top-ctl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+#speed-select {
+  font-size: 12px;
+  background: #ddd;
+  border: 1px solid #999;
+  padding: 1px 4px;
+  color: #333;
+}
+
+/* ── Timeline ── */
+#timeline-wrap {
+  flex: 0 0 90px;
+  background: #646464;
+  position: relative;
+}
+
+#timeline {
+  position: relative;
+  height: 90px;
+  display: flex;
+  padding: 0 18px;
+  gap: 2px;
+}
+
+.slice {
+  flex: 1;
+  background: #373737;
+  cursor: pointer;
+  position: relative;
+  align-self: stretch;
+  margin-top: 10px;   /* scrub area at top */
+}
+
+/* top scrub strip (always light) */
+#timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #e6e6e6;
+  pointer-events: none;
+}
+
+.slice.selected {
+  box-shadow: inset 0 0 0 2px #ff2020;
+}
+
+/* tick mark divider every 8 slices */
+.slice.tick::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: rgba(0,0,0,0.30);
+  pointer-events: none;
+  z-index: 1;
+}
+
+#playhead {
+  position: absolute;
+  top: 0;
+  left: 18px;
+  width: 2px;
+  height: 100%;
+  background: #ff2020;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#playhead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -4px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 10px solid #ff2020;
+}
+
+/* ── Lower area (3-column grid) ── */
+#lower {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: auto 110px 1fr;
+  min-height: 0;
+}
+
+/* ── Palette panel ── */
+#palette-panel {
+  background: #c8c8c8;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-right: 1px solid #aaa;
+}
+
+#swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 20px);
+  gap: 1px;
+}
+
+.swatch {
+  width: 20px;
+  height: 16px;
+  cursor: pointer;
+  position: relative;
+}
+
+.swatch:hover {
+  outline: 2px solid #fff;
+  outline-offset: -1px;
+  z-index: 1;
+}
+
+#color-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-row-label { font-size: 12px; color: #333; font-weight: 600; }
+
+#color-picker {
+  width: 32px;
+  height: 24px;
+  border: 1px solid #999;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+
+#hex-input {
+  width: 70px;
+  font-size: 12px;
+  font-family: monospace;
+  padding: 2px 5px;
+  border: 1px solid #999;
+  background: #fff;
+  color: #222;
+  user-select: text;
+}
+
+/* ── Preview panel ── */
+#preview-panel {
+  background: #c8c8c8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 10px;
+  border-right: 1px solid #aaa;
+}
+
+.panel-heading {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+#led {
+  width: 80px;
+  height: 160px;
+  border-radius: 4px;
+  background: rgb(55,55,55);
+  /* Fade is handled manually in JS (fadeTick), no CSS transition */
+}
+
+/* ── Controls panel ── */
+#controls-panel {
+  background: #646464;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.btn-action {
+  width: 220px;
+  height: 52px;
+  background: #e07818;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+}
+
+.btn-action:hover    { background: #f08828; }
+.btn-action:active   { background: #b85e10; }
+.btn-action.playing  { background: #505050; }
+.btn-action:disabled { background: #7c5030; cursor: not-allowed; }
+
+.btn-secondary {
+  width: 220px;
+  height: 38px;
+  background: #505050;
+  color: #e6e6e6;
+  border: 1px solid #707070;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover { background: #606060; }
+
+.ctrl-sep {
+  width: 200px;
+  border: none;
+  border-top: 1px solid #555;
+}
+
+/* ── Upload progress overlay ── */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+#overlay-box {
+  background: #c8c8c8;
+  color: #333;
+  border-radius: 8px;
+  padding: 24px 32px;
+  min-width: 290px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+#overlay-progress { width: 100%; }
+#overlay-sub      { font-size: 12px; color: #555; text-align: center; }
+
+/* ── Status bar ── */
+#status-bar {
+  flex: 0 0 24px;
+  background: #8c8c8c;
+  color: #333;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+#conn-status.connected    { color: #005500; font-weight: 700; }
+#conn-status.disconnected { color: #555; }
