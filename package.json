@@ -26,8 +26,9 @@
     "electron-builder": "^25.0.0"
   },
   "build": {
-    "appId": "com.thingm.blinkm-sequencer",
+    "appId": "com.thingm.blinkmsequencer",
     "productName": "BlinkMSequencer",
+    "copyright": "Copyright © 2026 ThingM",
     "icon": "build/icon",
     "asarUnpack": [
       "node_modules/node-hid/**/*"
