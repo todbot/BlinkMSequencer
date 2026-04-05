@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 Tod Kurt / ThingM
+// SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path   = require('path');

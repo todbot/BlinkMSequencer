@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 Tod Kurt / ThingM
+// SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
 
 // ── Constants ────────────────────────────────────────────────────────────────

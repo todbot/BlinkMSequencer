@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 Tod Kurt / ThingM
+// SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
 // ── LinkM USB HID driver + BlinkM I2C command set ─────────────────────────────
 // Protocol source: linkm-lib.c / hiddata.c (ThingM)
