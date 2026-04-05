@@ -145,13 +145,96 @@ body {
   flex-direction: column;
   gap: 8px;
   border-right: 1px solid #aaa;
+  width: 351px;   /* fixed: matches swatch grid (335px) + 8px padding each side */
+  align-items: flex-start;
+}
+
+/* ── Color picker tabs ── */
+#color-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.color-tab {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #aaa;
+  color: #444;
+  border: 1px solid #999;
+  border-radius: 3px 3px 0 0;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.color-tab:hover  { background: #bbb; }
+.color-tab.active { background: #e0e0e0; color: #111; border-bottom-color: #c8c8c8; }
+
+/* ── Tab panels ── */
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  height: 135px;  /* matches swatch grid: 8×16px rows + 7×1px gaps */
+}
+
+#tab-hsb,
+#tab-rgb {
+  width: 335px;
+}
+
+/* ── Slider rows ── */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+}
+
+.slider-label {
+  width: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  text-align: right;
+}
+
+.slider-row input[type="range"] {
+  flex: 1;
+  height: 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #555;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.slider-row input[type="number"] {
+  width: 44px;
+  font-size: 11px;
+  padding: 2px 3px;
+  border: 1px solid #999;
+  background: #fff;
+  color: #222;
+  text-align: right;
+  user-select: text;
 }
 
 #swatch-grid {
   display: grid;
   grid-template-columns: repeat(16, 20px);
   gap: 1px;
-  margin-top: 27px;
 }
 
 .swatch {
