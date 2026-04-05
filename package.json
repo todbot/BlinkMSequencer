@@ -37,6 +37,7 @@
       "main.js",
       "linkm.js",
       "preload.js",
+      "color-chooser.js",
       "renderer.js",
       "index.html",
       "style.css"
