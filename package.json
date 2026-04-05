@@ -1,6 +1,6 @@
 {
   "name": "blinkm-sequencer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "BlinkM Sequencer for LinkM (USB HID)",
   "author": "Tod Kurt <tod@todbot.com> (https://github.com/todbot)",
   "main": "main.js",
