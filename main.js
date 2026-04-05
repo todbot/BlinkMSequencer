@@ -57,6 +57,8 @@ ipcMain.handle('linkm:status', () => ({
   devicePresent: LinkM.devices().length > 0,
 }));
 
+ipcMain.handle('app:version', () => app.getVersion());
+
 // Live color update during playback preview.
 // Rate-limited and deduplicated — mirrors BlinkMComm.sendColor()'s guard.
 let lastSentRgb  = null;

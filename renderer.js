@@ -372,6 +372,9 @@ window.linkm.onBurnProgress((cur, _tot) => {
 colorChooser = initColorChooser((r, g, b) => applyColor(r, g, b));
 colorChooser.sync(DEFAULT_RGB.r, DEFAULT_RGB.g, DEFAULT_RGB.b);
 buildTimeline();
+window.linkm.appVersion().then(v => {
+  document.getElementById('app-version').textContent = `version ${v} \u00a9 ThingM Corporation`;
+});
 
 // Auto-connect if a LinkM is already plugged in at launch
 window.linkm.status().then(({ devicePresent }) => {
