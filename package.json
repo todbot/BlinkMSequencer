@@ -9,10 +9,10 @@
     "debug": "npx cross-env BLINKM_DEVTOOLS=1 electron .",
     "rebuild": "electron-rebuild -f -w node-hid",
     "dist:mac": "electron-builder --mac --publish never",
-    "dist:mac:unsigned": "electron-builder --mac --publish never --config build/unsigned.yml",
+    "dist:mac:unsigned": "electron-builder --mac --publish never --dir --config build/unsigned.yml",
     "dist:mac:universal": "electron-builder --mac --universal --publish never",
     "dist:win": "electron-builder --win --publish never",
-    "dist:win:unsigned": "electron-builder --win --publish never --config build/unsigned.yml",
+    "dist:win:unsigned": "electron-builder --win --publish never --dir --config build/unsigned.yml",
     "dist": "electron-builder --mac --win --publish never",
     "clean": "npx rimraf dist node_modules",
     "postinstall": "electron-builder install-app-deps"
@@ -43,7 +43,8 @@
       "style.css"
     ],
     "dmg": {
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "writeUpdateInfo": false
     },
     "mac": {
       "category": "public.app-category.utilities",

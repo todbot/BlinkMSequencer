@@ -123,6 +123,10 @@ Sourced from `~/projects/blinkm/linkM/c_host/linkm-lib.c` and `hiddata.c` — al
 
 All `dist:*` scripts pass `--publish never` to suppress `.blockmap` and `latest.yml` generation — this app does not use `electron-updater` for auto-updates, so those files are unnecessary. Do not remove this flag.
 
+Additionally, `"writeUpdateInfo": false` under `build.dmg` in `package.json` suppresses `.blockmap` file generation specifically for Mac DMG builds. Both flags are needed to fully prevent blockmap creation.  For unsigned builds, passing `--dir` will prevent it too. 
+
+For Windows, passing `  "differentialPackage": false` under `build.nsis` seems to prevent `.blockmap` file generation for NSIS installer.
+
 Before running `npm run dist:mac`, export (in bash):
 ```
 export APPLE_ID="you@example.com"
