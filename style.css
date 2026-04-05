@@ -145,7 +145,7 @@ body {
   flex-direction: column;
   gap: 8px;
   border-right: 1px solid #aaa;
-  width: 351px;   /* fixed: matches swatch grid (335px) + 8px padding each side */
+  width: 447px;   /* fixed: matches swatch grid (431px) + 8px padding each side */
   align-items: flex-start;
 }
 
@@ -175,12 +175,12 @@ body {
 .tab-panel {
   display: flex;
   flex-direction: column;
-  height: 135px;  /* matches swatch grid: 8×16px rows + 7×1px gaps */
+  height: 134px;  /* matches swatch grid: 9×14px rows + 8×1px gaps */
 }
 
 #tab-hsb,
 #tab-rgb {
-  width: 335px;
+  width: 431px;
 }
 
 /* ── Slider rows ── */
@@ -233,13 +233,13 @@ body {
 
 #swatch-grid {
   display: grid;
-  grid-template-columns: repeat(16, 20px);
+  grid-template-columns: repeat(24, 17px);
   gap: 1px;
 }
 
 .swatch {
-  width: 20px;
-  height: 16px;
+  width: 17px;
+  height: 14px;
   cursor: pointer;
   position: relative;
 }
@@ -321,7 +321,7 @@ body {
 }
 
 .btn-action {
-  width: 420px;
+  width: 100%;
   height: 52px;
   background: #e07818;
   color: #fff;
@@ -333,13 +333,23 @@ body {
   letter-spacing: 0.3px;
 }
 
+/* Upload / Download are btn-half so they sit side-by-side; allow text to wrap */
+.btn-action.btn-half {
+  height: auto;
+  min-height: 44px;
+  font-size: 13px;
+  white-space: normal;
+  line-height: 1.3;
+  padding: 6px 4px;
+}
+
 .btn-action:hover    { background: #f08828; }
 .btn-action:active   { background: #b85e10; }
 .btn-action.playing  { background: #505050; }
 .btn-action:disabled { background: #7c5030; cursor: not-allowed; }
 
 .btn-secondary {
-  width: 420px;
+  width: 100%;
   height: 38px;
   background: #505050;
   color: #e6e6e6;
@@ -354,7 +364,7 @@ body {
 .btn-row {
   display: flex;
   gap: 6px;
-  width: 420px;
+  width: 100%;
 }
 
 .btn-half {
@@ -363,7 +373,7 @@ body {
 }
 
 .ctrl-sep {
-  width: 420px;
+  width: 100%;
   border: none;
   border-top: 1px solid #555;
 }

@@ -239,19 +239,19 @@ function rgbToHsv(r, g, b) {
 
 function buildSwatches() {
   const grid = document.getElementById('swatch-grid');
-  const COLS = 16;
+  const COLS = 24;
 
-  // 6 rows: full-saturation hues at decreasing value (brightness)
-  for (let row = 0; row < 6; row++) {
+  // Row 1: pastel (low saturation)
+  for (let col = 0; col < COLS; col++) {
+    addSwatch(grid, hsvToRgb(col / COLS, 0.35, 1.0));
+  }
+  // 7 rows: full-saturation hues at decreasing value (brightness)
+  for (let row = 0; row < 7; row++) {
     for (let col = 0; col < COLS; col++) {
       addSwatch(grid, hsvToRgb(col / COLS, 1.0, 1.0 - row * 0.13));
     }
   }
-  // Row 7: pastel (low saturation)
-  for (let col = 0; col < COLS; col++) {
-    addSwatch(grid, hsvToRgb(col / COLS, 0.35, 1.0));
-  }
-  // Row 8: grayscale
+  // Row 9: grayscale
   for (let col = 0; col < COLS; col++) {
     const v = Math.round((col / (COLS - 1)) * 255);
     addSwatch(grid, { r: v, g: v, b: v });
