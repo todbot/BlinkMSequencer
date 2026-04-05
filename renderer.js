@@ -28,6 +28,8 @@ let ledTarg = { ...DEFAULT_RGB };
 const FADE_STEP = 25;
 setInterval(fadeTick, 25);
 
+let colorChooser;   // set during init
+
 // ── DOM refs ─────────────────────────────────────────────────────────────────
 const timelineEl  = document.getElementById('timeline');
 const playheadEl  = document.getElementById('playhead');
@@ -35,25 +37,11 @@ const playBtn     = document.getElementById('play-btn');
 const uploadBtn   = document.getElementById('upload-btn');
 const downloadBtn = document.getElementById('download-btn');
 const openBtn     = document.getElementById('open-btn');
-const saveBtn     = document.getElementById('save-btn');   // "Save…"
+const saveBtn     = document.getElementById('save-btn');
 const connectBtn  = document.getElementById('connect-btn');
 const loopCheck   = document.getElementById('loop-check');
 const speedSelect = document.getElementById('speed-select');
-const colorPicker = document.getElementById('color-picker');
-const hexInput    = document.getElementById('hex-input');
 const ledEl       = document.getElementById('led');
-const hsbH        = document.getElementById('hsb-h');
-const hsbHVal     = document.getElementById('hsb-h-val');
-const hsbS        = document.getElementById('hsb-s');
-const hsbSVal     = document.getElementById('hsb-s-val');
-const hsbBSlider  = document.getElementById('hsb-b');
-const hsbBVal     = document.getElementById('hsb-b-val');
-const rgbR        = document.getElementById('rgb-r');
-const rgbRVal     = document.getElementById('rgb-r-val');
-const rgbG        = document.getElementById('rgb-g');
-const rgbGVal     = document.getElementById('rgb-g-val');
-const rgbB        = document.getElementById('rgb-b');
-const rgbBVal     = document.getElementById('rgb-b-val');
 const connStatus  = document.getElementById('conn-status');
 const overlay     = document.getElementById('overlay');
 const overlayMsg  = document.getElementById('overlay-msg');
@@ -126,7 +114,7 @@ function onSliceDown(e, i) {
     isDragging = true;
     dragAnchor = i;
     const { r, g, b } = sliceColors[i];
-    syncColorInputs(r, g, b);
+    colorChooser.sync(r, g, b);
   }
   refreshSelected();
   e.preventDefault();
@@ -144,52 +132,11 @@ function onSliceEnter(i) {
 function onSliceDblClick(i) {
   selected.add(i);
   const { r, g, b } = sliceColors[i];
-  syncColorInputs(r, g, b);
-  colorPicker.click();  // open native OS color picker
+  colorChooser.sync(r, g, b);
+  colorChooser.openNativePicker();
 }
 
 // ── Color logic ───────────────────────────────────────────────────────────────
-
-function highlightSwatch(r, g, b) {
-  document.querySelectorAll('.swatch.active').forEach(el => el.classList.remove('active'));
-  const match = document.querySelector(
-    `.swatch[data-r="${r}"][data-g="${g}"][data-b="${b}"]`
-  );
-  if (match) match.classList.add('active');
-}
-
-// Update all color input widgets to reflect an r,g,b value (without applying to slices)
-function syncColorInputs(r, g, b) {
-  const hex = rgbToHex(r, g, b);
-  colorPicker.value = hex;
-  hexInput.value    = hex;
-  highlightSwatch(r, g, b);
-
-  rgbR.value = r; rgbRVal.value = r;
-  rgbG.value = g; rgbGVal.value = g;
-  rgbB.value = b; rgbBVal.value = b;
-
-  const { h, s, v } = rgbToHsv(r, g, b);
-  const hDeg = Math.round(h * 359);
-  const sPct = Math.round(s * 100);
-  const vPct = Math.round(v * 100);
-  hsbH.value = hDeg;   hsbHVal.value = hDeg;
-  hsbS.value = sPct;   hsbSVal.value = sPct;
-  hsbBSlider.value = vPct; hsbBVal.value = vPct;
-  updateHsbTracks(h, s, v);
-}
-
-// Update HSB slider track gradient backgrounds to reflect current hue/sat/val
-function updateHsbTracks(h, s, v) {
-  const hDeg = h * 360;
-  hsbH.style.background =
-    'linear-gradient(to right,hsl(0,100%,50%),hsl(60,100%,50%),hsl(120,100%,50%),hsl(180,100%,50%),hsl(240,100%,50%),hsl(300,100%,50%),hsl(360,100%,50%))';
-  hsbS.style.background =
-    `linear-gradient(to right,hsl(${hDeg},0%,50%),hsl(${hDeg},100%,50%))`;
-  const { r: fr, g: fg, b: fb } = hsvToRgb(h, s, 1.0);
-  hsbBSlider.style.background =
-    `linear-gradient(to right,#000,rgb(${fr},${fg},${fb}))`;
-}
 
 function applyColor(r, g, b) {
   selected.forEach(i => {
@@ -197,81 +144,7 @@ function applyColor(r, g, b) {
     setCellBg(cellEl(i), { r, g, b });
   });
   setLedTarget(r, g, b);
-  highlightSwatch(r, g, b);
   if (isConnected) window.linkm.sendColor(r, g, b);
-}
-
-function rgbToHex(r, g, b) {
-  return '#' + [r, g, b].map(n => n.toString(16).padStart(2, '0')).join('');
-}
-
-function hexToRgb(hex) {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
-  return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
-}
-
-// ── Swatch palette (16 × 8 = 128 swatches) ───────────────────────────────────
-
-function hsvToRgb(h, s, v) {
-  const i = Math.floor(h * 6);
-  const f = h * 6 - i;
-  const p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
-  const rs = [v, q, p, p, t, v];
-  const gs = [t, v, v, q, p, p];
-  const bs = [p, p, t, v, v, q];
-  const k  = i % 6;
-  return {
-    r: Math.round(rs[k] * 255),
-    g: Math.round(gs[k] * 255),
-    b: Math.round(bs[k] * 255),
-  };
-}
-
-function rgbToHsv(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
-  let h = 0;
-  if (d !== 0) {
-    if      (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-    else if (max === g) h = ((b - r) / d + 2) / 6;
-    else                h = ((r - g) / d + 4) / 6;
-  }
-  return { h, s: max === 0 ? 0 : d / max, v: max };
-}
-
-function buildSwatches() {
-  const grid = document.getElementById('swatch-grid');
-  const COLS = 24;
-
-  // Row 1: pastel (low saturation)
-  for (let col = 0; col < COLS; col++) {
-    addSwatch(grid, hsvToRgb(col / COLS, 0.35, 1.0));
-  }
-  // 7 rows: full-saturation hues at decreasing value (brightness)
-  for (let row = 0; row < 7; row++) {
-    for (let col = 0; col < COLS; col++) {
-      addSwatch(grid, hsvToRgb(col / COLS, 1.0, 1.0 - row * 0.13));
-    }
-  }
-  // Row 9: grayscale
-  for (let col = 0; col < COLS; col++) {
-    const v = Math.round((col / (COLS - 1)) * 255);
-    addSwatch(grid, { r: v, g: v, b: v });
-  }
-}
-
-function addSwatch(container, { r, g, b }) {
-  const el = document.createElement('div');
-  el.className = 'swatch';
-  el.dataset.r = r;
-  el.dataset.g = g;
-  el.dataset.b = b;
-  el.style.backgroundColor = `rgb(${r},${g},${b})`;
-  el.addEventListener('click', () => {
-    syncColorInputs(r, g, b);
-    applyColor(r, g, b);
-  });
-  container.appendChild(el);
 }
 
 // ── LED preview fade (mirrors ColorPreview.pde's ColorFader) ──────────────────
@@ -337,7 +210,7 @@ function scheduleFrame() {
     setLedTarget(c.r, c.g, c.b);
     if (idx !== lastPlayIdx) {
       lastPlayIdx = idx;
-      syncColorInputs(c.r, c.g, c.b);
+      colorChooser.sync(c.r, c.g, c.b);
       const isUnset = c.r === DEFAULT_RGB.r && c.g === DEFAULT_RGB.g && c.b === DEFAULT_RGB.b;
       if (isConnected) {
         window.linkm.sendColor(isUnset ? 0 : c.r, isUnset ? 0 : c.g, isUnset ? 0 : c.b);
@@ -481,78 +354,6 @@ speedSelect.addEventListener('change', () => {
   if (isConnected) window.linkm.preparePreview(duration);
 });
 
-// Tab switching
-document.querySelectorAll('.color-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.color-tab').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
-  });
-});
-
-// HSB slider helpers
-function applyHsbSliders() {
-  const h = parseInt(hsbH.value, 10) / 359;
-  const s = parseInt(hsbS.value, 10) / 100;
-  const v = parseInt(hsbBSlider.value, 10) / 100;
-  const { r, g, b } = hsvToRgb(h, s, v);
-  const hex = rgbToHex(r, g, b);
-  colorPicker.value = hex;
-  hexInput.value    = hex;
-  hsbHVal.value = hsbH.value;
-  hsbSVal.value = hsbS.value;
-  hsbBVal.value = hsbBSlider.value;
-  updateHsbTracks(h, s, v);
-  // sync RGB tab too
-  rgbR.value = r; rgbRVal.value = r;
-  rgbG.value = g; rgbGVal.value = g;
-  rgbB.value = b; rgbBVal.value = b;
-  applyColor(r, g, b);
-}
-
-[hsbH, hsbS, hsbBSlider].forEach(el => el.addEventListener('input', applyHsbSliders));
-hsbHVal.addEventListener('change', () => { hsbH.value = hsbHVal.value; applyHsbSliders(); });
-hsbSVal.addEventListener('change', () => { hsbS.value = hsbSVal.value; applyHsbSliders(); });
-hsbBVal.addEventListener('change', () => { hsbBSlider.value = hsbBVal.value; applyHsbSliders(); });
-
-// RGB slider helpers
-function applyRgbSliders() {
-  const r = parseInt(rgbR.value, 10);
-  const g = parseInt(rgbG.value, 10);
-  const b = parseInt(rgbB.value, 10);
-  const hex = rgbToHex(r, g, b);
-  colorPicker.value = hex;
-  hexInput.value    = hex;
-  rgbRVal.value = r;
-  rgbGVal.value = g;
-  rgbBVal.value = b;
-  // sync HSB tab too
-  const { h, s, v } = rgbToHsv(r, g, b);
-  hsbH.value = Math.round(h * 359); hsbHVal.value = Math.round(h * 359);
-  hsbS.value = Math.round(s * 100); hsbSVal.value = Math.round(s * 100);
-  hsbBSlider.value = Math.round(v * 100); hsbBVal.value = Math.round(v * 100);
-  updateHsbTracks(h, s, v);
-  applyColor(r, g, b);
-}
-
-[rgbR, rgbG, rgbB].forEach(el => el.addEventListener('input', applyRgbSliders));
-rgbRVal.addEventListener('change', () => { rgbR.value = rgbRVal.value; applyRgbSliders(); });
-rgbGVal.addEventListener('change', () => { rgbG.value = rgbGVal.value; applyRgbSliders(); });
-rgbBVal.addEventListener('change', () => { rgbB.value = rgbBVal.value; applyRgbSliders(); });
-
-colorPicker.addEventListener('input', () => {
-  const c = hexToRgb(colorPicker.value);
-  if (c) { hexInput.value = colorPicker.value; syncColorInputs(c.r, c.g, c.b); applyColor(c.r, c.g, c.b); }
-});
-
-hexInput.addEventListener('change', () => {
-  const raw = hexInput.value.trim();
-  const hex = raw.startsWith('#') ? raw : '#' + raw;
-  const c   = hexToRgb(hex);
-  if (c) { syncColorInputs(c.r, c.g, c.b); applyColor(c.r, c.g, c.b); }
-});
-
 // Push events from main process (only 'disconnected' — fired when device errors/unplugs)
 window.linkm.onStatus(state => {
   if (state === 'disconnected') {
@@ -568,9 +369,9 @@ window.linkm.onBurnProgress((cur, _tot) => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-buildSwatches();
+colorChooser = initColorChooser((r, g, b) => applyColor(r, g, b));
+colorChooser.sync(DEFAULT_RGB.r, DEFAULT_RGB.g, DEFAULT_RGB.b);
 buildTimeline();
-syncColorInputs(DEFAULT_RGB.r, DEFAULT_RGB.g, DEFAULT_RGB.b);
 
 // Auto-connect if a LinkM is already plugged in at launch
 window.linkm.status().then(({ devicePresent }) => {
