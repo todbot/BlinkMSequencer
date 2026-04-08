@@ -85,8 +85,7 @@ class LinkM extends EventEmitter {
     this._device.sendFeatureReport(buf);
     if (recvLen > 0) {
       // The C reference implementation sleeps 50ms before reading the response.
-      const deadline = Date.now() + 60;
-      while (Date.now() < deadline) { /* busy-wait */ }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 60);
       const resp = this._device.getFeatureReport(REPORT_ID, REPORT1_SIZE);
       if (!resp || resp.length < 2) throw new Error('LinkM read failed');
       // resp[0] = reportId, resp[1] = LinkM error code, resp[2..] = data
@@ -124,7 +123,7 @@ class LinkM extends EventEmitter {
   setScriptLength(id, len, reps) { this._i2c([0x4C, id, len, reps]); }
 
   // 'B' (0x42) — Set boot parameters (play script on power-up)
-  setBootParams(fadeSpeed, reps) { this._i2c([0x42, 1, 0, 0, fadeSpeed, reps]); }
+  setBootParams(fadeSpeed, reps) { this._i2c([0x42, 1, 0, reps, fadeSpeed, 0]); }
 
   // 'W' (0x57) — Write script line (script_id=0, line, ticks, cmd='c', r, g, b)
   writeScriptLine(line, ticks, r, g, b) {
