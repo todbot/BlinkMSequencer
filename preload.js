@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('linkm', {
   // Push events (main → renderer)
   onStatus:       (fn) => ipcRenderer.on('linkm:status',       (_, state)    => fn(state)),
   onBurnProgress: (fn) => ipcRenderer.on('linkm:burnProgress', (_, cur, tot) => fn(cur, tot)),
+  onEditAction:   (fn) => ipcRenderer.on('edit:action',        (_, action)   => fn(action)),
 
   // App info
   appVersion: () => ipcRenderer.invoke('app:version'),

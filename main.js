@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2026 Tod Kurt / ThingM
 // SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path   = require('path');
 const fs     = require('fs');
 const { LinkM } = require('./linkm');
@@ -227,7 +227,24 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow);
+function buildMenu() {
+  const send = action => win?.webContents.send('edit:action', action);
+  const template = [
+    ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : []),
+    {
+      label: 'Edit',
+      submenu: [
+        { label: 'Cut',   accelerator: 'CmdOrCtrl+X', click: () => send('cut') },
+        { label: 'Copy',  accelerator: 'CmdOrCtrl+C', click: () => send('copy') },
+        { label: 'Paste', accelerator: 'CmdOrCtrl+V', click: () => send('paste') },
+        { label: 'Undo',  accelerator: 'CmdOrCtrl+Z', click: () => send('undo') },
+      ],
+    },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
+app.whenReady().then(() => { createWindow(); buildMenu(); });
 
 app.on('window-all-closed', () => {
   lm.disconnect();

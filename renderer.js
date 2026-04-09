@@ -15,8 +15,10 @@ let duration    = 1;       // BlinkM ticks (1=3s, 18=30s, 72=120s)
 
 // ticks → wall-clock seconds, used only for the playback animation timer
 const TICK_SECONDS = { 1: 3, 18: 30, 72: 120 };
-let isConnected = false;
-let isDragging  = false;
+let isConnected   = false;
+let isDragging    = false;
+let clipboard     = null;   // array of {r,g,b} in sorted-index order, or null
+let undoSnapshot  = null;   // full sliceColors snapshot before last cut/paste
 let dragAnchor  = 0;
 let playRafId   = null;
 let playStart   = 0;       // performance.now() timestamp
@@ -301,6 +303,65 @@ function loadColors(colors) {
   sliceColors = colors.map(({ r, g, b }) => ({ r, g, b }));
   timelineEl.querySelectorAll('.slice').forEach((el, i) => setCellBg(el, sliceColors[i]));
 }
+
+// ── Cut / Paste / Undo ────────────────────────────────────────────────────────
+
+function snapshotColors() {
+  return sliceColors.map(c => ({ ...c }));
+}
+
+function sortedSelected() {
+  return [...selected].sort((a, b) => a - b);
+}
+
+function copySlices() {
+  const indices = sortedSelected();
+  if (!indices.length) return;
+  clipboard = indices.map(i => ({ ...sliceColors[i] }));
+}
+
+function cutSlices() {
+  const indices = sortedSelected();
+  if (!indices.length) return;
+  undoSnapshot = snapshotColors();
+  clipboard = indices.map(i => ({ ...sliceColors[i] }));
+  indices.forEach(i => {
+    sliceColors[i] = { ...DEFAULT_RGB };
+    setCellBg(cellEl(i), DEFAULT_RGB);
+  });
+}
+
+function pasteSlices() {
+  if (!clipboard) return;
+  const start = Math.min(...selected);
+  const end   = Math.min(start + clipboard.length - 1, NUM_SLICES - 1);
+  undoSnapshot = snapshotColors();
+  for (let i = start; i <= end; i++) {
+    const c = clipboard[i - start];
+    sliceColors[i] = { ...c };
+    setCellBg(cellEl(i), c);
+  }
+  colorChooser.sync(clipboard[0].r, clipboard[0].g, clipboard[0].b);
+}
+
+function undoSlices() {
+  if (!undoSnapshot) return;
+  sliceColors = undoSnapshot;
+  undoSnapshot = null;
+  timelineEl.querySelectorAll('.slice').forEach((el, i) => setCellBg(el, sliceColors[i]));
+  const indices = sortedSelected();
+  if (indices.length) {
+    const c = sliceColors[indices[0]];
+    colorChooser.sync(c.r, c.g, c.b);
+  }
+}
+
+window.linkm.onEditAction(action => {
+  if (action === 'copy')  copySlices();
+  if (action === 'cut')   cutSlices();
+  if (action === 'paste') pasteSlices();
+  if (action === 'undo')  undoSlices();
+});
 
 // ── Connection ────────────────────────────────────────────────────────────────
 
